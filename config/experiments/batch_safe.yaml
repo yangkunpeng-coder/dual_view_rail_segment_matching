@@ -1,0 +1,6 @@
+# 当前可确定跑通的实验：三尺度结构、batch 4，显存与现有实验一致。
+# P2 相关（B1、D1）需要先在真实 imgsz/batch 下确认显存，暂不放进本清单；
+# 完整队列见同目录的 batch.yaml。
+runs:
+  - file: gas_center_dice.yaml
+    label: C2

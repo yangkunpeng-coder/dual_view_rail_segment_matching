@@ -1,0 +1,12 @@
+# 批量训练清单：按顺序执行，失败即停（可加 --keep-going 继续）。
+# file 相对于本文件所在目录；label 是报告里使用的实验代号。
+#
+# 2x2 矩阵：A0（三尺度+原生，已有）、C1（三尺度+中心线，已有）、
+#           B1（P2+原生）、D1（P2+中心线）、C2（三尺度+中心线+Dice）。
+runs:
+  - file: p2_four_scale.yaml
+    label: B1
+  - file: p2_gas_center.yaml
+    label: D1
+  - file: gas_center_dice.yaml
+    label: C2

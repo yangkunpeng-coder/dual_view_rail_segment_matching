@@ -1,0 +1,16 @@
+# 所有图片使用同一文本提示，每根输出 Mask 保留为一个独立实例。
+prompt: rail
+device: cuda:0
+resolution: 1008
+precision: bfloat16
+# 保留候选实例的最低分数。计算 AP 时会使用全部保留的候选。
+conf: 0.25
+# 叠加图及逐图漏检统计门限，可与候选最低分数分开调整。
+display_conf: 0.25
+mask_threshold: 0.5
+max_det: 300
+# 原图 Mask 在 CPU 上分块还原，控制高分辨率图像的显存占用。
+mask_chunk_size: 4
+
+# 是否保存逐图全尺寸叠加图；默认关闭以控制体积，需要人工复核时改为 true。
+save_overlays: false

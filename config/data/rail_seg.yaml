@@ -1,0 +1,7 @@
+# 在项目根目录运行 Ultralytics 时使用此配置。
+path: data/rail_seg
+train: images/train
+val: images/val
+test: images/test
+names:
+  0: rail

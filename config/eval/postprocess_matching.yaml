@@ -1,0 +1,6 @@
+# 关系级匹配评测：预测 Mask 不要求与 GT 下标一致。
+algorithm: rail_matching_mslc
+iou_thresholds: [0.50, 0.75]
+variants:
+  raw: null
+  post_065: 0.65

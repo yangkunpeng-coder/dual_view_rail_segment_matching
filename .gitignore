@@ -1,0 +1,35 @@
+# 数据、权重和实验产物
+/data/
+/doc/
+/AGENTS.md
+/out/
+/pretrain_pt/
+/temp/
+*.pt
+*.pth
+
+# 独立管理的第三方源码
+/ultralytics_src/
+/sam3_src/
+
+# Python 缓存、构建产物和虚拟环境
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+/.venv/
+/venv/
+/build/
+/dist/
+
+# 本机 IDE 和环境配置
+/.idea/
+/.vscode/
+.env
+.env.*
+!.env.example
+Thumbs.db
+Desktop.ini
+.DS_Store

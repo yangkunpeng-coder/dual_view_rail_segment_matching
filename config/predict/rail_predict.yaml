@@ -1,0 +1,20 @@
+# 预测输入尺寸，支持整数或 [高, 宽]。
+imgsz: 1280
+# GPU 编号或 cpu。
+device: 0
+batch: 1
+
+# 过滤低置信度的实例。
+conf: 0.25
+# 常规 NMS 的框 IoU 阈值；nms: false 时该值不生效。
+iou: 0.85
+# 主口径：null 表示 one-to-many 检测头 + NMS，项目报告的主指标用它。
+# 免 NMS 的对照口径见 config/predict/rail_predict_nmsfree.yaml。
+nms: null
+max_det: 300
+agnostic_nms: false
+
+retina_masks: true
+augment: false
+# null 使用默认精度，支持的 GPU 可用 16 启用 FP16。
+quantize: null

@@ -1,0 +1,7 @@
+# 由 data_preprocess/export_bbox_crop.py 生成，请勿手改。
+path: data/clop_seg_bbox
+train: images/train
+val: images/val
+test: images/test
+names:
+  0: rail

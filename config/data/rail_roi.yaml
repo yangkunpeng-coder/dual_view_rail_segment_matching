@@ -1,0 +1,33 @@
+input:
+  # 相对于 rail_data.yaml 指定的数据根目录，各自包含 south 和 north。
+  image_dir: .
+  json_dir: .
+  image_extensions: [".png", ".jpg", ".jpeg"]
+  # 优先复用已有划分，新数据集可设为 null 以按采集时间划分。
+  split_config: config/data/rail_seg.yaml
+
+annotation:
+  target_label: rail
+  polygon_only: true
+
+corridor:
+  margin_px: 16
+  margin_left_px: null
+  margin_right_px: null
+  # 可按相机和文件名覆盖，例如 south/20260911000341.png。
+  margin_overrides: {}
+  smoothing: median
+  smoothing_kernel: 9
+  max_interp_gap: 15
+  outside_fill_bgr: [114, 114, 114]
+  tight_bbox_after_mask: false
+
+output:
+  # 裁剪诊断附件。YOLO 数据集路径由 clop_seg.yaml 定义。
+  output_dir: data/clop_seg_artifacts
+  save_valid_mask: true
+  save_preview: true
+  preserve_original_json: true
+
+quality:
+  require_all_mask_pixels_inside: true

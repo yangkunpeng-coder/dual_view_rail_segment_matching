@@ -1,0 +1,21 @@
+# 免 NMS 的对照口径：与 config/predict/rail_predict.yaml 除 nms 外逐行一致。
+# 两种口径都要在验证集和测试集上各评一次，报告分列呈现。
+# 预测输入尺寸，支持整数或 [高, 宽]。
+imgsz: 1280
+# GPU 编号或 cpu。
+device: 0
+batch: 1
+
+# 过滤低置信度的实例。
+conf: 0.25
+# 常规 NMS 的框 IoU 阈值；nms: false 时该值不生效。
+iou: 0.85
+# 对照口径：false 表示使用 one-to-one 检测头，推理不做 NMS。
+nms: false
+max_det: 300
+agnostic_nms: false
+
+retina_masks: true
+augment: false
+# null 使用默认精度，支持的 GPU 可用 16 启用 FP16。
+quantize: null

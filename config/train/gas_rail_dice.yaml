@@ -1,0 +1,28 @@
+# C2 用的 GAS 参数：在中心线监督之外，额外启用原生实例掩码损失的 Dice 项。
+# 除 dice_weight 外与 config/train/gas_rail.yaml 完全一致，便于单变量对比。
+# 权重为 0 即该项关闭；头部通道数按权重推导：1 中心线，+2 方向/平滑，+1 宽度。
+
+# 四项辅助损失权重。
+center_weight: 0.05
+direction_weight: 0.0
+smooth_weight: 0.0
+width_weight: 0.0
+# 原生实例掩码损失里的 Dice 项；不为 0 时不需要辅助头。
+dice_weight: 0.5
+
+# 权重 warmup：从 1/warmup_epochs 线性升到 1。
+warmup_epochs: 3.0
+# 平滑项的采样步长，单位原图格。
+smooth_delta: 1.0
+
+target:
+  mask_ratio: 4          # 必须等于 Proto 的 imgsz/4
+  sigma_cells: 0.75
+  direction_band_cells: 2.0
+  tangent_window: 5
+  tangent_max_residual_px: 1.5
+
+head:
+  hidden_channels: null  # null 时单通道用 16、多通道用 32
+  centerline_prior: 0.02
+  width_prior: 1.9

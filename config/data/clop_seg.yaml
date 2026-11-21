@@ -1,0 +1,7 @@
+# 裁剪后且通过自动检查的 YOLO 实例分割数据集。
+path: data/clop_seg
+train: images/train
+val: images/val
+test: images/test
+names:
+  0: rail

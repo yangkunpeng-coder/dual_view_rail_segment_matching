@@ -1,0 +1,111 @@
+# 路径相对于项目根目录。
+model: config/model/yolo26m-seg.yaml
+pretrained: pretrain_pt/yolo26m-seg.pt
+data: config/data/clop_seg.yaml
+project: out/yolo_seg
+
+# ===== 训练规模 =====
+# epochs 取 100：20261111_133043 实际在 97 轮早停（最好 76 轮），
+# 原 200 轮线性 schedule 被截断，最好权重只走到峰值学习率的 62%。
+epochs: 100
+imgsz: 1280
+rect: true  # 矩形批；rect 下 mosaic/mixup/cutmix 会被 Ultralytics 强制为 0
+mask_ratio: 4  # 必须与 Proto 的 imgsz/4 对齐；P2 开启时由 p2.mask_ratio 覆盖
+batch: 4
+device: 0
+workers: 0
+amp: true
+patience: 30  # 让余弦退火跑完，不在末期被早停截断
+seed: 42
+exist_ok: false
+
+# ===== 优化器与学习率 =====
+# 20261111_133043 使用 optimizer: auto，运行时推导为 AdamW + lr0=0.002。
+# 这里显式写死，避免 lr 随 batch/epochs/nc 漂移；cos_lr 让 100 轮内退火完整。
+optimizer: AdamW
+lr0: 0.002
+lrf: 0.01
+cos_lr: true
+momentum: 0.9  # AdamW 的 beta1
+weight_decay: 0.0005  # 只作用于 weight 组，BN 与 bias 为 0
+warmup_epochs: 3.0  # 约 9 次参数更新
+warmup_momentum: 0.8
+warmup_bias_lr: 0.0
+nbs: 64  # batch=2 → 梯度累积 32 步，等效 batch 64
+
+# ===== 损失权重 =====
+box: 7.5
+cls: 0.5
+dfl: 1.5
+
+# ===== 原生在线数据增强（仅 online_augmentation.enabled=false 时生效）=====
+hsv_h: 0.015
+hsv_s: 0.7
+hsv_v: 0.4
+
+degrees: 0.0
+translate: 0.1
+scale: 0.5
+shear: 0.0
+perspective: 0.0
+
+flipud: 0.0
+fliplr: 0.5
+bgr: 0.0
+
+mosaic: 0.0
+mixup: 0.0
+cutmix: 0.0
+copy_paste: 0.0
+
+multi_scale: 0.0
+
+# 训练完成后自动使用最优权重运行独立 valid 和 test。
+online_augmentation:
+  enabled: false  # 必须保持 false，否则上面的原生增强会被代码清零
+  config: config/train/rail_online_augmentation.yaml
+
+# ===== P2 四尺度开关 =====
+# enabled: false → 使用上方的 model / pretrained / mask_ratio（基线三尺度）
+# enabled: true  → 改用 P2 结构与迁移权重，mask_ratio 强制覆盖为 2
+# 迁移权重由 data_preprocess/transfer_yolo26m_seg_p2.py 生成；
+# 模型 YAML 的文件名必须保留 "26m"，否则 Ultralytics 会按 n 构建。
+p2:
+  enabled: false
+  model: config/model/yolo26m-seg-p2.yaml
+  pretrained: pretrain_pt/yolo26m-seg-p2-init-warm.pt
+  mask_ratio: 2
+
+# ===== 内容裁剪开关 =====
+# enabled: true → 训练改用裁掉外圈填充色的数据集；开训前必须先运行
+#   python data_preprocess/export_bbox_crop.py
+# 关闭时保持原数据集与原流程，不产生任何额外副作用。
+bbox_crop:
+  enabled: true
+  fill_value: 114
+  tolerance: 2
+  margin: 0
+  min_size: 64
+  dataset: data/clop_seg_bbox
+  data_config: config/data/clop_seg_bbox.yaml
+
+# ===== 可视化（TensorBoard）=====
+# enabled: true → 训练前打开 Ultralytics 的 TensorBoard 集成，每轮把损失/指标/学习率
+#   写入实验目录的 events 文件；不影响训练结果，只多出 events 文件。
+# 看板：python tools\run_pipeline.py yolo-board（默认 6006 端口，可追加 --port）
+# 说明：doc/thinking/YOLO训练可视化_TensorBoard使用说明_v1.0.md
+tensorboard:
+  enabled: true
+
+# ===== GAS-Rail 辅助监督开关 =====
+# enabled: true → 选 GasTrainer，并读取下面的参数文件（快照到实验 configs/ 下）
+# enabled: false → 走原训练器，不建头、不生成目标、不算辅助项
+gas:
+  enabled: true
+  config: config/train/gas_rail.yaml
+
+# 开训前填写本次实验说明，写入实验目录的 change.md。
+change:
+  plan: "GAS-Rail L1：裁灰边数据 + 中心线热力图辅助监督（direction/smooth/width/dice 全关）"
+  reasoning: "基线 20261112_010458 已有 coverage_gap 类误差，先只加中心线一项，单变量隔离辅助监督的效果"
+  problem: "看独立 valid 的 mAP50-95 能否不低于 61.44% 基线，且逐实例 coverage_gap/broken 下降"

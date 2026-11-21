@@ -1,0 +1,46 @@
+# 光度增强先独立抽样，再从 degradation 中至多抽一种退化。
+brightness_contrast:
+  enabled: true
+  probability: 1.0
+  alpha: [0.92, 1.08]
+  beta: [-10, 10]
+gamma:
+  enabled: true
+  probability: 0.5
+  exponent: [0.92, 1.08]
+white_balance:
+  enabled: true
+  probability: 0.3
+  channel_gain: [0.98, 1.02]
+saturation:
+  enabled: true
+  probability: 0.3
+  gain: [0.92, 1.08]
+hue:
+  enabled: true
+  probability: 0.3
+  # OpenCV 8-bit HSV 的 H 通道单位，区间端点均可取到。
+  delta: [-1, 1]
+
+degradation:
+  # 四项概率之和必须为 1。关闭某项时，其概率并入无退化。
+  none_probability: 0.62
+  gaussian_noise:
+    enabled: true
+    probability: 0.15
+    sigma: [1.0, 3.0]
+  gaussian_blur:
+    enabled: true
+    probability: 0.08
+    kernel_size: 3
+    sigma: [0.3, 0.6]
+  jpeg_compression:
+    enabled: true
+    probability: 0.15
+    quality: [90, 100]
+
+roi:
+  # 使用裁剪导出清单的 yolo_image 和 valid_mask 列，路径相对于项目根目录。
+  manifest: data/clop_seg_artifacts/audit/manifest.csv
+  # 每个数据加载进程最多缓存的已缩放掩码数，0 表示不缓存。
+  cache_size: 32

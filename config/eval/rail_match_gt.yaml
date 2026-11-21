@@ -1,0 +1,39 @@
+# 南北钢轨匹配真值的路径与标注口径。
+
+# 真值根目录，相对项目根目录。一次性定稿，不再分版本目录。
+root: data/rail_match_gt
+
+# 真值批次标签，只写入文件内容用于追溯，不参与路径。
+gt_version: v1
+
+# 参与标注的划分名，同时决定清单中的 split 取值。
+splits: [valid, test]
+
+# 划分名到分割数据集目录名的映射：真值用 valid/test，YOLO 数据集用 val/test。
+seg_split_dirs:
+  valid: val
+  test: test
+
+# 用于判定完整图对的分割数据集：两侧图必须落在同一 split。
+seg_dataset: data/clop_seg
+seg_image_subdir: images
+
+# 预标注使用的算法名，取自 experiments/rail_match_eval.py 的注册名。
+prelabel_algorithms: [rail_matching, rail_matching_mslc, rail_matching_gmsa]
+# 证据平票时优先采用的算法。
+prelabel_tie_break: rail_matching_mslc
+
+# 不确定项占比超过该值的图对，其真值标记为不可用。
+uncertain_pair_limit: 0.20
+# 指标置信区间水平。
+wilson_level: 0.95
+
+# 标注有问题的图对：整对排除出指标，但仍保留标注文件与原因，便于追溯。
+# 剔除原因：
+#   ambiguous_shift_annotation —— 两侧轨数不等且轨束近等距，标注者依据上下文定的
+#   整列对应关系无法由几何复现（当前算法在多个相同合理的整列平移之间无法裁决）。
+excluded_pairs:
+  P0089: ambiguous_shift_annotation
+  P0092: ambiguous_shift_annotation
+  P0094: ambiguous_shift_annotation
+

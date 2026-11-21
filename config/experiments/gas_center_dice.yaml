@@ -1,0 +1,91 @@
+# C2：三尺度 + 中心线 0.05 + Dice 0.5，裁边数据。
+# 与 config/train/train_rail_seg.yaml 的区别只有 gas.config 指向带 Dice 的变体，其余逐项一致。
+# 路径相对于项目根目录。
+model: config/model/yolo26m-seg.yaml
+pretrained: pretrain_pt/yolo26m-seg.pt
+data: config/data/clop_seg.yaml
+project: out/yolo_seg
+
+# ===== 训练规模 =====
+epochs: 100
+imgsz: 1280
+rect: true
+mask_ratio: 4
+batch: 4
+device: 0
+workers: 0
+amp: true
+patience: 30
+seed: 42
+exist_ok: false
+
+# ===== 优化器与学习率 =====
+optimizer: AdamW
+lr0: 0.002
+lrf: 0.01
+cos_lr: true
+momentum: 0.9
+weight_decay: 0.0005
+warmup_epochs: 3.0
+warmup_momentum: 0.8
+warmup_bias_lr: 0.0
+nbs: 64
+
+# ===== 损失权重 =====
+box: 7.5
+cls: 0.5
+dfl: 1.5
+
+# ===== 原生在线数据增强 =====
+hsv_h: 0.015
+hsv_s: 0.7
+hsv_v: 0.4
+degrees: 0.0
+translate: 0.1
+scale: 0.5
+shear: 0.0
+perspective: 0.0
+flipud: 0.0
+fliplr: 0.5
+bgr: 0.0
+mosaic: 0.0
+mixup: 0.0
+cutmix: 0.0
+copy_paste: 0.0
+multi_scale: 0.0
+
+online_augmentation:
+  enabled: false
+  config: config/train/rail_online_augmentation.yaml
+
+# ===== P2 四尺度开关 =====
+p2:
+  enabled: false
+  model: config/model/yolo26m-seg-p2.yaml
+  pretrained: pretrain_pt/yolo26m-seg-p2-init-warm.pt
+  mask_ratio: 2
+
+# ===== 内容裁剪开关 =====
+bbox_crop:
+  enabled: true
+  fill_value: 114
+  tolerance: 2
+  margin: 0
+  min_size: 64
+  dataset: data/clop_seg_bbox
+  data_config: config/data/clop_seg_bbox.yaml
+
+# ===== 可视化 =====
+tensorboard:
+  enabled: true
+
+# ===== GAS-Rail 辅助监督开关 =====
+gas:
+  enabled: true
+  config: config/train/gas_rail_dice.yaml
+
+# ===== 本次实验说明，写入实验目录的 change.md =====
+change:
+  plan: "C2 三尺度 + 中心线 0.05 + Dice 0.5，裁边数据"
+  reasoning: "在 C1（20261112_023205）基础上叠加 Dice，针对短缺口与高 IoU 段"
+  problem: "valid ≥62.6%、test ≥69.0%，缺口严重度 ≤11.0"

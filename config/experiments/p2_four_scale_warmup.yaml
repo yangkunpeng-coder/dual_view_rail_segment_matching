@@ -1,0 +1,94 @@
+# B1 四尺度 + P2 分配热身。训练参数按历史 B1 归档，路径相对于项目根目录。
+model: config/model/yolo26m-seg.yaml
+pretrained: pretrain_pt/yolo26m-seg.pt
+data: config/data/clop_seg.yaml
+project: out/yolo_seg
+
+# ===== 训练规模 =====
+epochs: 100
+imgsz: 1280
+rect: true
+mask_ratio: 4          # P2 开启时由 p2.mask_ratio 覆盖为 2
+batch: 1              # 与历史 B1 实际 batch 一致
+device: 0
+workers: 0
+amp: true
+patience: 30
+seed: 42
+exist_ok: false
+
+# ===== 优化器与学习率 =====
+optimizer: AdamW
+lr0: 0.002
+lrf: 0.01
+cos_lr: true
+momentum: 0.9
+weight_decay: 0.0005
+warmup_epochs: 3.0
+warmup_momentum: 0.8
+warmup_bias_lr: 0.0
+nbs: 64
+
+# ===== 损失权重 =====
+box: 7.5
+cls: 0.5
+dfl: 1.5
+
+# ===== 原生在线数据增强 =====
+hsv_h: 0.015
+hsv_s: 0.7
+hsv_v: 0.4
+degrees: 0.0
+translate: 0.1
+scale: 0.5
+shear: 0.0
+perspective: 0.0
+flipud: 0.0
+fliplr: 0.5
+bgr: 0.0
+mosaic: 0.0
+mixup: 0.0
+cutmix: 0.0
+copy_paste: 0.0
+multi_scale: 0.0
+
+online_augmentation:
+  enabled: false
+  config: config/train/rail_online_augmentation.yaml
+
+# ===== P2 四尺度与正样本分配热身 =====
+p2:
+  enabled: true
+  model: config/model/yolo26m-seg-p2.yaml
+  pretrained: pretrain_pt/yolo26m-seg-p2-init-warm.pt
+  mask_ratio: 2
+  assignment_warmup:
+    enabled: true
+    epochs: 3
+    max_positives_per_gt: 1
+    target_score: 0.5
+
+# ===== 内容裁剪开关 =====
+bbox_crop:
+  enabled: true
+  fill_value: 114
+  tolerance: 2
+  margin: 0
+  min_size: 64
+  dataset: data/clop_seg_bbox
+  data_config: config/data/clop_seg_bbox.yaml
+
+# ===== 可视化 =====
+tensorboard:
+  enabled: true
+
+# ===== GAS-Rail 辅助监督开关 =====
+gas:
+  enabled: false
+  config: config/train/gas_rail.yaml
+
+# ===== 本次实验说明，写入实验目录的 change.md =====
+change:
+  plan: "按 B1 的训练条件重新训练四尺度模型，前 3 轮启用 P2 分配热身"
+  reasoning: "为缺少有效 P2 正样本的 GT 补充分配，使 P2 框回归和掩码系数在训练初期获得监督"
+  problem: "评估热身后能否获得原生 P2 正样本，以及独立 valid/test 的 Mask mAP50–95 是否高于 B1"

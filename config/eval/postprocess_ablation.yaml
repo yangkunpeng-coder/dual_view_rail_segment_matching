@@ -1,0 +1,7 @@
+# 后处理消融：在固定预测上比较 raw 与不同 Mask NMS 阈值。
+conf: 0.25
+duplicate_iou: 0.50
+merge_gt_coverage: 0.22
+merge_pred_coverage: 0.08
+min_area_px: 8
+thresholds: [0.50, 0.55, 0.60, 0.65, 0.70]
